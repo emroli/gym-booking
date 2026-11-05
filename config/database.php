@@ -40,8 +40,10 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             // Wait for a competing writer instead of failing straight away.
             'busy_timeout' => 5000,
-            'journal_mode' => 'wal',
-            'synchronous' => 'normal',
+            // Not WAL: migrate:fresh empties this file but leaves a -wal file
+            // alone, so a killed process's leftover writes corrupt the database.
+            'journal_mode' => 'delete',
+            'synchronous' => null,
             // Take the write lock at BEGIN. SQLite has no row locks, so this is
             // what stops two bookings reading the same spot count at once.
             'transaction_mode' => 'IMMEDIATE',

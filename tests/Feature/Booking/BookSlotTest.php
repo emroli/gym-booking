@@ -225,3 +225,7 @@ it('uses a clear message for each failure', function (BookingFailure $failure, s
 it('keeps the database in the immediate transaction mode that prevents overbooking', function () {
     expect(config('database.connections.sqlite.transaction_mode'))->toBe('IMMEDIATE');
 });
+
+it('stays out of WAL mode, which migrate:fresh can corrupt after a killed process', function () {
+    expect(config('database.connections.sqlite.journal_mode'))->toBe('delete');
+});
