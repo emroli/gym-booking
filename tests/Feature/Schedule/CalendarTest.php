@@ -52,6 +52,26 @@ describe('viewing', function () {
         Livewire::test('pages::schedule')->assertSee('1 spot left');
     });
 
+    it('doesn\'t repeat "0 spots left" on a full class', function () {
+        $slot = Slot::factory()->capacity(1)->create();
+        Booking::factory()->create(['slot_id' => $slot->id]);
+
+        Livewire::test('pages::schedule')
+            ->assertSee('data-state="full"', false)
+            ->assertDontSee('0 spots left');
+    });
+
+    it('starts this week at today on a phone, but shows past weeks in full', function () {
+        $page = Livewire::test('pages::schedule');
+
+        // It's Wednesday, so Monday and Tuesday are hidden.
+        expect(substr_count($page->html(), 'max-xl:hidden'))->toBe(2);
+
+        $page->call('previousWeek');
+
+        expect(substr_count($page->html(), 'max-xl:hidden'))->toBe(0);
+    });
+
     it('doesn\'t run more queries as classes are added', function () {
         $this->actingAs($this->member);
 
@@ -93,12 +113,24 @@ describe('the week', function () {
         Livewire::test('pages::schedule')
             ->call('nextWeek')
             ->assertSet('week', '2026-11-09')
+            ->assertSee('9 Nov – 15 Nov 2026')
             ->call('nextWeek')
             ->assertSet('week', '2026-11-16')
+            ->assertSee('16 Nov – 22 Nov 2026')
             ->call('previousWeek')
             ->assertSet('week', '2026-11-09')
+            ->assertSee('9 Nov – 15 Nov 2026')
             ->call('thisWeek')
-            ->assertSet('week', '');
+            ->assertSet('week', '')
+            ->assertSee('2 Nov – 8 Nov 2026');
+    });
+
+    it('shows the new week\'s classes straight after moving', function () {
+        $nextWeek = Slot::factory()->at(CarbonImmutable::parse('2026-11-10 18:00'))->create();
+
+        $page = Livewire::test('pages::schedule')->call('nextWeek');
+
+        $page->assertSee('data-slot-id="'.$nextWeek->id.'"', false);
     });
 
     it('reads the week from the URL', function () {

@@ -33,7 +33,7 @@
         <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $classSlot->trainer->name }}</p>
     </div>
 
-    @unless (in_array($state, [App\Enums\SlotState::Past, App\Enums\SlotState::Cancelled]))
+    @unless (in_array($state, [App\Enums\SlotState::Past, App\Enums\SlotState::Cancelled, App\Enums\SlotState::Full]))
         <p class="text-xs text-zinc-600 dark:text-zinc-300" data-spots-left>
             {{ trans_choice(':count spot left|:count spots left', $classSlot->spots_left) }}
         </p>

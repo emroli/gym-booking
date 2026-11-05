@@ -41,6 +41,20 @@ class SlotForm extends Form
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'class_type_id' => 'class type',
+            'trainer_id' => 'trainer',
+            'starts_at' => 'start time',
+            'ends_at' => 'end time',
+            'repeat_until' => 'repeat date',
+        ];
+    }
+
     private function endsAfterStart(string $attribute, mixed $value, Closure $fail): void
     {
         if (strtotime((string) $value) <= strtotime($this->starts_at)) {

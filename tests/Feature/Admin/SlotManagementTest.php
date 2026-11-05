@@ -84,6 +84,14 @@ describe('adding a class', function () {
         'bad start' => ['starts_at', 'nonsense'],
     ]);
 
+    it('uses plain field names in its messages', function () {
+        $page = Livewire::test('pages::admin.slots')->call('create')->call('save');
+
+        expect($page->errors()->first('form.class_type_id'))->toBe('The class type field is required.')
+            ->and($page->errors()->first('form.trainer_id'))->toBe('The trainer field is required.')
+            ->and($page->errors()->first('form.starts_at'))->toBe('The start time field is required.');
+    });
+
     it('rejects a trainer who is already teaching', function () {
         Slot::factory()->for($this->trainer)->at(CarbonImmutable::parse('2026-11-10 18:30'))->create();
 
