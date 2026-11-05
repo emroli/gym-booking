@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Enums\BookingFailure;
+use App\Events\SlotAvailabilityChanged;
 use App\Exceptions\BookingException;
 use App\Models\Booking;
 use App\Models\Slot;
@@ -31,6 +32,8 @@ final readonly class BookSlot
                 $booking = Booking::query()->firstOrNew(['user_id' => $user->id, 'slot_id' => $slot->id]);
                 $booking->cancelled_at = null;
                 $booking->save();
+
+                SlotAvailabilityChanged::announce($slot->id);
 
                 return $booking;
             });

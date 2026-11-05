@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Data\SlotData;
+use App\Events\SlotAvailabilityChanged;
 use App\Models\Slot;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -26,6 +27,8 @@ final readonly class UpdateSlot
                 'ends_at' => $data->endsAt,
                 'capacity' => $data->capacity,
             ])->save();
+
+            SlotAvailabilityChanged::announce($slot->id);
 
             return $slot;
         });

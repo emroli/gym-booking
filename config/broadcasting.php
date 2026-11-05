@@ -31,6 +31,7 @@ return [
     'connections' => [
 
         'reverb' => [
+            // Short timeouts: a slow WebSocket server must not hold up a booking.
             'driver' => 'reverb',
             'key' => env('REVERB_APP_KEY'),
             'secret' => env('REVERB_APP_SECRET'),
@@ -42,7 +43,8 @@ return [
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                'connect_timeout' => 1,
+                'timeout' => 2,
             ],
         ],
 

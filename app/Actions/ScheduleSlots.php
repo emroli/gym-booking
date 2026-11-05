@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Data\SlotData;
+use App\Events\SlotAvailabilityChanged;
 use App\Models\Slot;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -44,7 +45,7 @@ final readonly class ScheduleSlots
 
             $seriesId = $starts->count() > 1 ? (string) Str::uuid() : null;
 
-            return $starts->map(fn (CarbonImmutable $start): Slot => Slot::query()->create([
+            $slots = $starts->map(fn (CarbonImmutable $start): Slot => Slot::query()->create([
                 'class_type_id' => $data->classTypeId,
                 'trainer_id' => $data->trainerId,
                 'starts_at' => $start,
@@ -52,6 +53,11 @@ final readonly class ScheduleSlots
                 'capacity' => $data->capacity,
                 'series_id' => $seriesId,
             ]));
+
+            // Calendars reload the whole week, so one event covers a whole series.
+            SlotAvailabilityChanged::announce($slots->firstOrFail()->id);
+
+            return $slots;
         });
     }
 

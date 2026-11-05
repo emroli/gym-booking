@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Events\SlotAvailabilityChanged;
 use App\Models\Slot;
 
 final readonly class CancelSlot
@@ -14,6 +15,8 @@ final readonly class CancelSlot
         if (! $slot->isCancelled()) {
             $slot->cancelled_at = now();
             $slot->save();
+
+            SlotAvailabilityChanged::announce($slot->id);
         }
 
         return $slot;

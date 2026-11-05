@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Events\SlotAvailabilityChanged;
 use App\Models\Booking;
 
 final readonly class CancelBooking
@@ -14,6 +15,8 @@ final readonly class CancelBooking
         if ($booking->isActive()) {
             $booking->cancelled_at = now();
             $booking->save();
+
+            SlotAvailabilityChanged::announce($booking->slot_id);
         }
 
         return $booking;

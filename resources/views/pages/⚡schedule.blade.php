@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -33,6 +34,16 @@ new #[Title('Schedule')] class extends Component {
 
     #[Computed]
     public function weekStart(): CarbonImmutable
+    {
+        return $this->resolveWeekStart();
+    }
+
+    /**
+     * Actions that change the week must use this, not the computed property.
+     * Livewire caches a computed value for the whole request, so reading it
+     * before changing the week would make the re-render show the old week.
+     */
+    private function resolveWeekStart(): CarbonImmutable
     {
         $date = CarbonImmutable::hasFormat($this->week, 'Y-m-d')
             ? CarbonImmutable::parse($this->week)
@@ -109,14 +120,24 @@ new #[Title('Schedule')] class extends Component {
         return Trainer::query()->orderBy('name')->get();
     }
 
+    /**
+     * Someone booked, cancelled or changed a class. There's nothing to do here:
+     * calling this makes Livewire re-render, which re-reads from the database.
+     */
+    #[On('echo:schedule,SlotAvailabilityChanged')]
+    public function refreshAvailability(): void
+    {
+        //
+    }
+
     public function previousWeek(): void
     {
-        $this->week = $this->weekStart->subWeek()->format('Y-m-d');
+        $this->week = $this->resolveWeekStart()->subWeek()->format('Y-m-d');
     }
 
     public function nextWeek(): void
     {
-        $this->week = $this->weekStart->addWeek()->format('Y-m-d');
+        $this->week = $this->resolveWeekStart()->addWeek()->format('Y-m-d');
     }
 
     public function thisWeek(): void
@@ -204,7 +225,11 @@ new #[Title('Schedule')] class extends Component {
 
     <div class="grid gap-4 xl:grid-cols-7 xl:gap-2">
         @foreach ($this->days as $day)
-            <section wire:key="day-{{ $day->format('Y-m-d') }}" class="flex flex-col gap-2">
+            {{-- On a phone, this week starts at today rather than a list of finished classes. --}}
+            <section wire:key="day-{{ $day->format('Y-m-d') }}" @class([
+                'flex flex-col gap-2',
+                'max-xl:hidden' => $day->lessThan(today()) && $this->weekStart->equalTo(today()->startOfWeek(CarbonImmutable::MONDAY)),
+            ])>
                 <h2 @class([
                     'flex items-baseline gap-2 border-b pb-1 text-sm font-medium xl:flex-col xl:gap-0',
                     'border-zinc-800 text-zinc-900 dark:border-white dark:text-white' => $day->isToday(),
