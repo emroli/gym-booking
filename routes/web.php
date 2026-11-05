@@ -5,10 +5,15 @@ use App\Models\Slot;
 use App\Models\Trainer;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::redirect('/', '/schedule')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+Route::livewire('schedule', 'pages::schedule')->name('schedule');
+
+Route::middleware('auth')->group(function () {
+    // Fortify and the starter kit's auth flows send people here after login.
+    Route::redirect('dashboard', '/schedule')->name('dashboard');
+
+    Route::livewire('my-bookings', 'pages::my-bookings')->name('my-bookings');
 });
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
