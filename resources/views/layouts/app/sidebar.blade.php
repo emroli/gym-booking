@@ -16,19 +16,23 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+
+                @can('viewAny', App\Models\Slot::class)
+                    <flux:sidebar.group :heading="__('Admin')" class="grid">
+                        <flux:sidebar.item icon="calendar-days" :href="route('admin.slots')" :current="request()->routeIs('admin.slots*')" wire:navigate>
+                            {{ __('Slots') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="tag" :href="route('admin.class-types')" :current="request()->routeIs('admin.class-types')" wire:navigate>
+                            {{ __('Class types') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="academic-cap" :href="route('admin.trainers')" :current="request()->routeIs('admin.trainers')" wire:navigate>
+                            {{ __('Trainers') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endcan
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
